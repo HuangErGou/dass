@@ -12,6 +12,17 @@ int main(int argc, char const *argv[]) {
   currenty1.add(currenty2).output();
   currenty1.increment(currenty2);
   currenty1.output();
+
+  currenty1.subtract(currenty2).output();
+
+  std::cout << "stand out is:" << currenty1 << std::endl;
+  std::cin >> currenty1;
+  std::cout << "your input is:" << currenty1 << std::endl;
+
+  std::cout << currenty1 << std::endl;
+  std::cout << currenty2 << std::endl;
+  std::cout << currenty1 + currenty2 << std::endl;
+  std::cout << currenty1 - currenty2 << std::endl;
   return 0;
 }
 
@@ -37,14 +48,7 @@ void Currency::setValue(double amount) {
 }
 
 Currency Currency::add(const Currency &value) const {
-  long a3 = castToLong() + value.castToLong();
-
-  signType result_sign = a3 >= 0 ? plus : minus;
-  if (minus == result_sign) a3 = -a3;
-
-  unsigned long result_dollars = a3 / 100;
-  unsigned int result_cents = a3 - result_dollars * 100;
-  return Currency(result_sign, result_dollars, result_cents);
+  return longToCurrenty(castToLong() + value.castToLong());
 }
 
 Currency &Currency::increment(const Currency &value) {
@@ -52,7 +56,20 @@ Currency &Currency::increment(const Currency &value) {
   return *this;
 }
 
-Currency Currency::subtract(const Currency &value) const { return Currency(); }
+Currency Currency::subtract(const Currency &value) const {
+  return longToCurrenty(castToLong() - value.castToLong());
+}
+
+Currency Currency::operator+(const Currency &x) const { return add(x); }
+
+Currency Currency::operator-(const Currency &x) const { return subtract(x); }
+
+void Currency::input() {
+  double x = 0;
+  std::cout << "please input:";
+  std::cin >> x;
+  setValue(x);
+}
 
 void Currency::output() const {
   if (_sign == minus) std::cout << "-";
@@ -65,4 +82,29 @@ long Currency::castToLong() const {
   long value = _dollars * 100 + _cents;
   value = _sign == plus ? value : value;
   return value;
+}
+
+Currency Currency::longToCurrenty(long x) const {
+  signType result_sign = x >= 0 ? plus : minus;
+  if (minus == result_sign) x = -x;
+
+  unsigned long result_dollars = x / 100;
+  unsigned int result_cents = x - result_dollars * 100;
+  return Currency(result_sign, result_dollars, result_cents);
+}
+
+std::ostream &operator<<(std::ostream &os, const Currency &x) {
+  if (x._sign == minus) os << "-";
+  os << "$" << x._dollars << ".";
+  if (x._cents < 10) os << "0";
+  os << x._cents;
+  return os;
+}
+
+std::istream &operator>>(std::istream &is, Currency &x) {
+  double v = 0;
+
+  is >> v;
+  x.setValue(v);
+  return is;
 }
