@@ -89,16 +89,62 @@ class ArrayList : public LinearList<T> {
     _element[index] = element;
   }
 
-  void output(std::ostream& os) const {
-    for (size_t i = 0; i < _size; i++) {
-      os << _element[i] << " ";
+  void push_back(const T& element) {
+    if ((_size + 1) > _capablity) {
+      T* p = new T[_capablity * 2];
+      std::copy(_element, _element + _size, p);
+
+      delete _element;
+      _element = p;
+      _capablity = _capablity * 2;
     }
-    os << std::endl;
+    _element[_size] = element;
+    _size++;
+  }
+
+  void pop_back() {
+    if (_size <= 0) return;
+
+    _size--;
+    if (_size < _capablity / 4) {
+      size_t new_capalibity = _capablity / 2;
+      T* p = new T[new_capalibity];
+
+      std::copy(_element, _element + _size, p);
+      delete _element;
+      _element = p;
+    }
+  }
+
+  void swap(ArrayList<T>& arrayList) {
+    T* p = _element;
+    size_t size = _size;
+    size_t capability = _capablity;
+
+    _element = arrayList._element;
+    _size = arrayList._size;
+    _capablity = arrayList._capablity;
+
+    arrayList._element = p;
+    arrayList._size = size;
+    arrayList._capablity = capability;
+  }
+
+  void reverse() {
+    for (size_t i = 0; i < _size; i++) {
+      if (i < _size - i - 1) {
+        std::swap(_element[i], _element[_size - i - 1]);
+      } else {
+        break;
+      }
+    }
   }
 
   T& operator[](int index) { return get(index); }
-
   bool operator==(const ArrayList<T>& arrayList) const;
+  bool operator!=(const ArrayList<T>& arrayList) const {
+    return !((*this) == arrayList);
+  }
 
  private:
   T* _element = nullptr;
@@ -109,37 +155,23 @@ class ArrayList : public LinearList<T> {
 int main(int argc, char const* argv[]) {
   ArrayList<int>* list = new ArrayList<int>(2);
 
-  for (size_t i = 0; i < 100; i++) {
-    list->insert(0, i);
+  for (size_t i = 0; i < 19; i++) {
+    list->push_back(i);
   }
-  list->output(std::cout);
-
-  for (size_t i = 0; i < 90; i++) {
-    list->erase(0);
-  }
-  list->output(std::cout);
-
-  (*list)[0] = 100;
-  list->output(std::cout);
-
   std::cout << *list << std::endl;
 
-  ArrayList<int>* list2 = new ArrayList<int>(*list);
-  std::cout << *list2 << std::endl;
+  ArrayList<int> list2(*list);
+  for (size_t i = 0; i < 11; i++) {
+    list2.pop_back();
+  }
+  list->swap(list2);
+  std::cout << *list << std::endl;
 
-  bool isEqual = (*list2) == (*list);
-  std::cout << "is equal:" << isEqual << std::endl;
-
-  list2->insert(2, 3);
-  isEqual = (*list2) == (*list);
-  std::cout << "is equal:" << isEqual << std::endl;
-
-  // list[0] = 123;
-  // list->output(std::cout);
+  list2.reverse();
+  std::cout << list2 << std::endl;
 
   delete list;
   list = nullptr;
-  delete list2;
   return 0;
 }
 
