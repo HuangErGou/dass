@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 
 template <typename T>
@@ -10,6 +11,45 @@ class LinearList {
   virtual int indexOf(const T& element) const = 0;
   virtual void erase(int index) = 0;
   virtual void insert(int index, const T& element) = 0;
+};
+
+template <typename T>
+class MyIterator {
+ public:
+  MyIterator(T* postion = 0) : _position(postion) {}
+  T& operator*() const { return *_position; }
+  T* operator->() const { return &*_position; }
+  MyIterator& operator++() {
+    ++_position;
+    return *this;
+  }
+  MyIterator operator++(int) {
+    MyIterator old = *this;
+    ++_position;
+    return old;
+  }
+  MyIterator& operator--() {
+    --_position;
+    return *this;
+  }
+  MyIterator operator--(int) {
+    MyIterator old = *this;
+    --_position;
+    return old;
+  }
+  MyIterator operator[](int index) { return MyIterator(_position + index); }
+  MyIterator operator+(int n) { return MyIterator(_position + n); }
+  MyIterator operator-(int n) { return MyIterator(_position - n); }
+
+  bool operator==(const MyIterator& right) const {
+    return _position == right._position;
+  }
+  bool operator!=(const MyIterator& right) const {
+    return _position != right._position;
+  }
+
+ private:
+  T* _position;
 };
 
 template <typename T>
@@ -29,6 +69,10 @@ class ArrayList : public LinearList<T> {
     _size = array._size;
     std::copy(array._element, array._element + array._size, _element);
   }
+
+  MyIterator<T> begin() { return MyIterator(_element); }
+
+  MyIterator<T> end() { return MyIterator(_element + _size); }
 
   ~ArrayList() { delete _element; }
 
@@ -169,6 +213,14 @@ int main(int argc, char const* argv[]) {
 
   list2.reverse();
   std::cout << list2 << std::endl;
+
+  for (MyIterator<int> iterator = list2.begin(); iterator != list2.end();
+       iterator++) {
+    std::cout << *iterator << ",";
+  }
+  std::cout << std::endl;
+
+  std::cout << "random is: " << *((list2.begin() + 2)[3] - 1) << std::endl;
 
   delete list;
   list = nullptr;
