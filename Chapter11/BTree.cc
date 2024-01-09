@@ -43,6 +43,13 @@ class BTree : public BTreeInf<T> {
     _size = 0;
   }
 
+  ~BTree() { erase(); }
+
+  BTree(const BTree<T> &tree) {
+    _root = copy(tree._root);
+    _size = tree._size;
+  }
+
   bool empty() const override { return _size == 0; }
 
   size_t size() const override { return _size; }
@@ -151,6 +158,16 @@ class BTree : public BTreeInf<T> {
     delete n;
     n = nullptr;
   }
+
+  static BTreeNode<T> *copy(BTreeNode<T> *from) {
+    if (from == nullptr) return nullptr;
+
+    BTreeNode<T> *node = nullptr;
+    node = new BTreeNode(from->_element);
+    node->_left_child = copy(from->_left_child);
+    node->_right_child = copy(from->_right_child);
+    return node;
+  }
 };
 
 int main(int argc, char const *argv[]) {
@@ -162,5 +179,8 @@ int main(int argc, char const *argv[]) {
 
   std::cout << "depth is:" << tree.depth() << std::endl;
   tree.level_order();
+
+  BTree<int> tree2(tree);
+  tree2.level_order();
   return 0;
 }
